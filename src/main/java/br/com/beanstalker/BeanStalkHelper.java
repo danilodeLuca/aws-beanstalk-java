@@ -12,20 +12,19 @@ public class BeanStalkHelper {
 	private static final int MONITORING_INTERVAL = 1000 * 20;
 	private static final int MONITORING_COUNT = 100;
 
-	public BeanStalkHelper(ByType type) {
-		this.type = type;
-	}
-
 	public BeanStalkHelper(AWSElasticBeanstalk awsBeanStalk) {
 		this.awsBeanStalk = awsBeanStalk;
+		byId();
 	}
 
-	public static BeanStalkHelper byId() {
-		return new BeanStalkHelper(ByType.ID);
+	public BeanStalkHelper byId() {
+		this.type = ByType.ID;
+		return this;
 	}
 
-	public static BeanStalkHelper byName() {
-		return new BeanStalkHelper(ByType.NAME);
+	public BeanStalkHelper byName() {
+		this.type = ByType.NAME;
+		return this;
 	}
 
 	public BeanStalkHelper rebuildEnvironment(String environmentId) throws InterruptedException, BeanStalkException {
@@ -33,14 +32,27 @@ public class BeanStalkHelper {
 		if (environmentUp)
 			return this;
 
-		RebuildEnvironmentRequest rebuildEnvironmentRequest = new RebuildEnvironmentRequest();
-		rebuildEnvironmentRequest.withEnvironmentId(environmentId);
+		RebuildEnvironmentRequest rebuildEnvironmentRequest = type.getRebuildEnvironmentRequest(environmentId);
 		this.awsBeanStalk.rebuildEnvironment(rebuildEnvironmentRequest);
 		waitEnviromentToBeReady(environmentId);
 		return this;
 	}
 
+	public BeanStalkHelper terminateEnvironment(String environmentId) throws InterruptedException {
+		TerminateEnvironmentRequest terminateConfig = type.getTerminateEnvironmentRequest(environmentId);
+		this.awsBeanStalk.terminateEnvironment(terminateConfig);
+		waitEnviromentToBeShutDown(environmentId);
+		return this;
+	}
+
 	private boolean isEnvironmentUp(String environmentId) throws BeanStalkException {
+		String actualStatus = getEnvironmentStatus(environmentId);
+		return !actualStatus.equalsIgnoreCase(EnvironmentStatus.Terminated.toString()) && !actualStatus
+				.equalsIgnoreCase(EnvironmentStatus.Terminating.toString());
+
+	}
+
+	private boolean isEnvironmentShutDown(String environmentId) throws BeanStalkException {
 		String actualStatus = getEnvironmentStatus(environmentId);
 		return !actualStatus.equalsIgnoreCase(EnvironmentStatus.Terminated.toString()) && !actualStatus
 				.equalsIgnoreCase(EnvironmentStatus.Terminating.toString());
@@ -58,14 +70,6 @@ public class BeanStalkHelper {
 		System.out.println(" [STATUS/HEALTH] " + environment.getStatus() + "/" + environment.getHealth());
 
 		return environment.getStatus();
-	}
-
-	public BeanStalkHelper terminateEnvironment(String environmentId) throws InterruptedException {
-		TerminateEnvironmentRequest terminateConfig = new TerminateEnvironmentRequest();
-		terminateConfig.withEnvironmentId(environmentId);
-		this.awsBeanStalk.terminateEnvironment(terminateConfig);
-		waitEnviromentToBeShutDown(environmentId);
-		return this;
 	}
 
 	private void waitEnviromentToBeShutDown(String environmentId) throws InterruptedException {
@@ -106,9 +110,8 @@ public class BeanStalkHelper {
 		}
 	}
 
-	private List<EnvironmentDescription> getEnvironments(String environmentId) {
-		DescribeEnvironmentsRequest describer = new DescribeEnvironmentsRequest().withEnvironmentIds(environmentId);
-
+	private List<EnvironmentDescription> getEnvironments(String environment) {
+		DescribeEnvironmentsRequest describer = type.getDescribeEnvironmentsRequest(environment);
 		return this.awsBeanStalk.describeEnvironments(describer).getEnvironments();
 	}
 }

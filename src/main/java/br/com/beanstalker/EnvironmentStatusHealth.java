@@ -1,5 +1,6 @@
 package br.com.beanstalker;
 
+import com.amazonaws.services.elasticbeanstalk.model.EnvironmentHealth;
 import com.amazonaws.services.elasticbeanstalk.model.EnvironmentStatus;
 
 class EnvironmentStatusHealth {
@@ -12,6 +13,16 @@ class EnvironmentStatusHealth {
 	}
 
 	public boolean isEnvironmentUp() {
-		return !status.equalsIgnoreCase(EnvironmentStatus.Terminated.toString()) && !status.equalsIgnoreCase(EnvironmentStatus.Terminating.toString());
+		return status != null && !EnvironmentStatus.Terminated.toString().equalsIgnoreCase(status) && !EnvironmentStatus.Terminating.toString()
+				.equalsIgnoreCase(status);
 	}
+
+	public boolean isHealthy() {
+		return EnvironmentHealth.Green.toString().equalsIgnoreCase(health) || checkYellowIsHealth();
+	}
+
+	private boolean checkYellowIsHealth() {
+		return EnvironmentHealth.Yellow.toString().equalsIgnoreCase(health) && isEnvironmentUp();
+	}
+
 }

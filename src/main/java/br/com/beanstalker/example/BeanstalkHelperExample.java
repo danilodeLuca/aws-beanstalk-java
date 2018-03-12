@@ -26,6 +26,12 @@ public class BeanstalkHelperExample {
 		};
 	}
 
+	private AWSElasticBeanstalk getAWSElasticBeastalk() {
+		AWSCredentialsProvider awsCredentialsProvider = getAwsCredentialsProvider();
+		String awsRegion = "us-east-1";
+		return AWSElasticBeanstalkClientBuilder.standard().withCredentials(awsCredentialsProvider).withRegion(awsRegion).build();
+	}
+
 	public void rebuildEnvironmentById() throws BeanStalkException, InterruptedException {
 		AWSElasticBeanstalk awsElasticBeastalk = getAWSElasticBeastalk();
 		new BeanstalkHelper(awsElasticBeastalk).byId().rebuildEnvironment("ENV_ID");
@@ -46,9 +52,4 @@ public class BeanstalkHelperExample {
 		new BeanstalkHelper(awsElasticBeastalk).byName().terminateEnvironment("ENV_NAME");
 	}
 
-	private AWSElasticBeanstalk getAWSElasticBeastalk() {
-		AWSCredentialsProvider awsCredentialsProvider = getAwsCredentialsProvider();
-		String awsRegion = "us-east-1";
-		return AWSElasticBeanstalkClientBuilder.standard().withCredentials(awsCredentialsProvider).withRegion(awsRegion).build();
-	}
 }

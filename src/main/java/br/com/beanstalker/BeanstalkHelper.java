@@ -71,11 +71,11 @@ public class BeanstalkHelper {
 		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Terminated, EnvironmentHealth.Grey);
 	}
 
-	public void waitEnviromentToBeReady(String environmentId) throws InterruptedException, BeanStalkException {
+	private void waitEnviromentToBeReady(String environmentId) throws InterruptedException, BeanStalkException {
 		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Ready, EnvironmentHealth.Green);
 	}
 
-	public void waitForEnvironmentToTransitionToStateAndHealth(String environment, EnvironmentStatus state, EnvironmentHealth health)
+	private void waitForEnvironmentToTransitionToStateAndHealth(String environment, EnvironmentStatus state, EnvironmentHealth health)
 			throws InterruptedException, BeanStalkException {
 		int count = 0;
 		while (true) {

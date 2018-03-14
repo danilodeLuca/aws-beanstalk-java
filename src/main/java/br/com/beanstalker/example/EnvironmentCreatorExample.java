@@ -14,7 +14,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 				.withUrl("MY-ENV")
 				.withConfiguration("64bit Amazon Linux 2017.09 v2.8.4 running Docker 17.09.1-ce")
 				.withVersion("V1")
-				.load();
+				.process();
 	}
 
 	public void createMultipleEnvs() throws BeanstalkException {
@@ -32,7 +32,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 					.withUrl("MY-ENV2")
 					.withConfiguration("64bit Amazon Linux 2017.09 v2.8.4 running Docker 17.09.1-ce")
 					.withVersion("V1")
-				.load();
+				.process();
 	}
 
 	public void createFromSavedConfig() throws BeanstalkException {
@@ -42,7 +42,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 				.withName("ENV NAME")
 				.withUrl("MY-ENV")
 				.withSavedConfiguration("SAVED_CONFIG")
-				.load();
+				.process();
 	}
 
 	public void killAll() throws BeanstalkException {
@@ -52,7 +52,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 				.withName("ENV NAME")
 				.withUrl("MY-ENV")
 				.withSavedConfiguration("SAVED_CONFIG")
-				.load();
+				.process();
 
 		environmentCreator.killAll();
 	}
@@ -64,7 +64,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 				.withName("ENV NAME")
 				.withUrl("MY-ENV")
 				.withSavedConfiguration("SAVED_CONFIG")
-				.load();
+				.process();
 
 		environmentCreator.kill("APP NAME", "ENV NAME");
 	}
@@ -76,7 +76,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 				.withName("ENV NAME")
 				.withUrl("MY-ENV")
 				.withSavedConfiguration("SAVED_CONFIG")
-				.load();
+				.process();
 
 		environmentCreator.getEnvironment("APP NAME", "ENV NAME");
 	}

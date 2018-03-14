@@ -3,6 +3,8 @@ package br.com.beanstalker;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.model.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BeanstalkHelper {
@@ -71,29 +73,47 @@ public class BeanstalkHelper {
 		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Terminated, EnvironmentHealth.Grey);
 	}
 
-	private void waitEnviromentToBeReady(String environmentId) throws InterruptedException, BeanstalkException {
+	public void waitEnviromentsToBeShutDown(List<String> envsIds) throws BeanstalkException, InterruptedException {
+		waitForEnvironmentsToTransitionToStateAndHealth(envsIds, EnvironmentStatus.Terminated, EnvironmentHealth.Grey);
+	}
+
+	public void waitEnviromentToBeReady(String environmentId) throws InterruptedException, BeanstalkException {
 		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Ready, EnvironmentHealth.Green);
+	}
+
+	public void waitEnviromentsToBeReady(List<String> envsIds) throws BeanstalkException, InterruptedException {
+		waitForEnvironmentsToTransitionToStateAndHealth(envsIds, EnvironmentStatus.Ready, EnvironmentHealth.Green);
 	}
 
 	private void waitForEnvironmentToTransitionToStateAndHealth(String environment, EnvironmentStatus state, EnvironmentHealth health)
 			throws InterruptedException, BeanstalkException {
+		waitForEnvironmentsToTransitionToStateAndHealth(Arrays.asList(environment), state, health);
+	}
+
+	private void waitForEnvironmentsToTransitionToStateAndHealth(List<String> environments, EnvironmentStatus state, EnvironmentHealth health)
+			throws InterruptedException, BeanstalkException {
+		List<String> environmentsDone = new ArrayList<>();
 		int count = 0;
-		while (true) {
+		while (true || environmentsDone.size() == environments.size()) {
 			Thread.sleep(MONITORING_INTERVAL);
 
 			if (count++ > MONITORING_COUNT) {
-				throw new RuntimeException("Environment " + environment + " never transitioned to " + state + "/" + health);
+				throw new RuntimeException(
+						"Some Environments didnt  transitioned to " + state + "/" + health + ", Environmentos OK are: " + environmentsDone + ", AllEnvs: "
+								+ environments);
 			}
 
-			EnvironmentStatusHealth environmentStatus = getEnvironmentStatus(environment);
-			if (environmentStatus.status.equalsIgnoreCase(state.toString()) == false) {
-				continue;
-			}
+			for (String env : environments) {
+				EnvironmentStatusHealth environmentStatus = getEnvironmentStatus(env);
+				if (!environmentStatus.status.equalsIgnoreCase(state.toString())) {
+					continue;
+				}
 
-			if (health != null && environmentStatus.health.equalsIgnoreCase(health.toString()) == false) {
-				continue;
+				if (health != null && !environmentStatus.health.equalsIgnoreCase(health.toString())) {
+					continue;
+				}
+				environmentsDone.add(env);
 			}
-			return;
 		}
 	}
 
@@ -106,4 +126,5 @@ public class BeanstalkHelper {
 		CreateEnvironmentResult environment = this.awsBeanStalk.createEnvironment(creatingEnvironment);
 		return environment;
 	}
+
 }

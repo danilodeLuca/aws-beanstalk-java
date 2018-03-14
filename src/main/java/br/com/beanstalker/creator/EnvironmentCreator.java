@@ -115,7 +115,15 @@ public class EnvironmentCreator {
 		return this.creatingEnvironment;
 	}
 
-	public EnvironmentCreator load() throws BeanstalkException {
+	public EnvironmentCreator process() throws BeanstalkException {
+		return process(false);
+	}
+
+	public EnvironmentCreator processAndWait() throws BeanstalkException {
+		return process(true);
+	}
+
+	public EnvironmentCreator process(boolean shouldWaitToBeReady) throws BeanstalkException {
 		List<CreateEnvironmentRequest> notProcessed = new ArrayList<>();
 		for (CreateEnvironmentRequest env : this.envsToCreate) {
 			try {
@@ -125,9 +133,28 @@ public class EnvironmentCreator {
 				notProcessed.add(env);
 			}
 		}
+
+		if (shouldWaitToBeReady) {
+			List<String> envsIds = getEnvsIds();
+			try {
+				helper.waitEnviromentsToBeReady(envsIds);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 		if (!notProcessed.isEmpty()) {
-			throw new BeanstalkException("Some environments were not load!" + notProcessed);
+			throw new BeanstalkException("Some environments were not process!" + notProcessed);
 		}
 		return this;
 	}
+
+	private List<String> getEnvsIds() {
+		List<String> envsIds = new ArrayList<>();
+		for (CreateEnvironmentResult env : environments.values()) {
+			envsIds.add(env.getEnvironmentId());
+		}
+		return envsIds;
+	}
+
 }

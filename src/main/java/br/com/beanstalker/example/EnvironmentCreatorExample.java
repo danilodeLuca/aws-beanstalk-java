@@ -45,7 +45,7 @@ public class EnvironmentCreatorExample extends BaseExample {
 				.process();
 	}
 
-	public void killAll() throws BeanstalkException {
+	public void killAll() throws BeanstalkException, InterruptedException {
 		AWSElasticBeanstalk aws = getAWSElasticBeastalk();
 		EnvironmentCreator environmentCreator = EnvironmentCreator.creator(aws).newEnv()
 				.withApplicationName("APP NAME")

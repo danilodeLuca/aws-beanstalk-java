@@ -54,6 +54,12 @@ EnvironmentCreator.creator(aws)
 		.withUrl("MY-ENV")
 		.withConfiguration("64bit Amazon Linux 2017.09 v2.8.4 running Docker 17.09.1-ce")
 		.withVersion("V1")
+	.newEnv()
+		.withApplicationName("APP NAME")
+		.withName("ENV NAME2")
+		.withUrl("MY-ENV2")
+		.withConfiguration("64bit Amazon Linux 2017.09 v2.8.4 running Docker 17.09.1-ce")
+		.withVersion("V2")
 	.process();
 ```
 ### Environment from Saved configuration on your Application

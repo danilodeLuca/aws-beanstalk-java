@@ -29,23 +29,33 @@ public class BeanstalkHelper {
 		return this;
 	}
 
-	public BeanstalkHelper rebuildEnvironment(String environmentId) throws InterruptedException, BeanstalkException {
+	public BeanstalkHelper rebuildEnvironmentAndWait(String environmentId) throws InterruptedException, BeanstalkException {
+		rebuildEnvironment(environmentId);
+		waitEnviromentToBeReady(environmentId);
+		return this;
+	}
+
+	public BeanstalkHelper rebuildEnvironment(String environmentId) throws BeanstalkException {
 		if (isEnvironmentUp(environmentId))
 			return this;
 
 		RebuildEnvironmentRequest rebuildEnvironmentRequest = type.getRebuildEnvironmentRequest(environmentId);
 		this.awsBeanStalk.rebuildEnvironment(rebuildEnvironmentRequest);
-		waitEnviromentToBeReady(environmentId);
 		return this;
 	}
 
-	public BeanstalkHelper terminateEnvironment(String environmentId) throws InterruptedException, BeanstalkException {
+	public BeanstalkHelper terminateEnvironmentAndWait(String environmentId) throws InterruptedException, BeanstalkException {
+		terminateEnvironment(environmentId);
+		waitEnviromentToBeShutDown(environmentId);
+		return this;
+	}
+
+	public BeanstalkHelper terminateEnvironment(String environmentId) throws BeanstalkException {
 		if (isEnvironmentShutDown(environmentId))
 			return this;
 
 		TerminateEnvironmentRequest terminateConfig = type.getTerminateEnvironmentRequest(environmentId);
 		this.awsBeanStalk.terminateEnvironment(terminateConfig);
-		waitEnviromentToBeShutDown(environmentId);
 		return this;
 	}
 
@@ -70,7 +80,7 @@ public class BeanstalkHelper {
 	}
 
 	private void waitEnviromentToBeShutDown(String environmentId) throws InterruptedException, BeanstalkException {
-		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Terminated, EnvironmentHealth.Grey);
+		waitEnviromentsToBeShutDown(Arrays.asList(environmentId));
 	}
 
 	public void waitEnviromentsToBeShutDown(List<String> envsIds) throws BeanstalkException, InterruptedException {
@@ -122,6 +132,13 @@ public class BeanstalkHelper {
 
 	public CreateEnvironmentResult createEnvironment(CreateEnvironmentRequest creatingEnvironment) {
 		CreateEnvironmentResult environment = this.awsBeanStalk.createEnvironment(creatingEnvironment);
+		return environment;
+	}
+
+
+	public CreateEnvironmentResult createEnvironmentAndWait(CreateEnvironmentRequest creatingEnvironment) throws BeanstalkException, InterruptedException {
+		CreateEnvironmentResult environment = createEnvironment(creatingEnvironment);
+		waitEnviromentToBeReady(environment.getEnvironmentId());
 		return environment;
 	}
 

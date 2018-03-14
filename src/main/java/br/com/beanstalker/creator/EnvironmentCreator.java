@@ -94,17 +94,20 @@ public class EnvironmentCreator {
 		return this.environments.get(appName + SEPARATOR + envName);
 	}
 
-	public void killAll() {
+	public void killAll() throws InterruptedException, BeanstalkException {
+		List<String> ended = new ArrayList<>();
 		for (CreateEnvironmentResult env : environments.values()) {
 			try {
 				this.helper.byId().terminateEnvironment(env.getEnvironmentId());
-			} catch (InterruptedException | BeanstalkException e) {
+				ended.add(env.getEnvironmentId());
+			} catch (BeanstalkException e) {
 				e.printStackTrace();
 			}
 		}
+		this.helper.waitEnviromentsToBeShutDown(ended);
 	}
 
-	public void kill(String appName, String envName) throws BeanstalkException, InterruptedException {
+	public void kill(String appName, String envName) throws BeanstalkException {
 		CreateEnvironmentResult envToKill = getEnvironment(appName, envName);
 		this.helper.byId().terminateEnvironment(envToKill.getEnvironmentId());
 	}
@@ -127,7 +130,7 @@ public class EnvironmentCreator {
 		List<CreateEnvironmentRequest> notProcessed = new ArrayList<>();
 		for (CreateEnvironmentRequest env : this.envsToCreate) {
 			try {
-				CreateEnvironmentResult environmetCreated = helper.createEnvironment(env);
+				CreateEnvironmentResult environmetCreated = this.helper.createEnvironment(env);
 				addEnvironment(environmetCreated);
 			} catch (Exception e) {
 				notProcessed.add(env);
@@ -144,7 +147,7 @@ public class EnvironmentCreator {
 		}
 
 		if (!notProcessed.isEmpty()) {
-			throw new BeanstalkException("Some environments were not process!" + notProcessed);
+			throw new BeanstalkException("Some environments were not processed!" + notProcessed);
 		}
 		return this;
 	}

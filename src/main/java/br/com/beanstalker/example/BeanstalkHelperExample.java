@@ -1,6 +1,6 @@
 package br.com.beanstalker.example;
 
-import br.com.beanstalker.BeanStalkException;
+import br.com.beanstalker.BeanstalkException;
 import br.com.beanstalker.BeanstalkHelper;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -32,22 +32,22 @@ public class BeanstalkHelperExample {
 		return AWSElasticBeanstalkClientBuilder.standard().withCredentials(awsCredentialsProvider).withRegion(awsRegion).build();
 	}
 
-	public void rebuildEnvironmentById() throws BeanStalkException, InterruptedException {
+	public void rebuildEnvironmentById() throws BeanstalkException, InterruptedException {
 		AWSElasticBeanstalk awsElasticBeastalk = getAWSElasticBeastalk();
 		new BeanstalkHelper(awsElasticBeastalk).byId().rebuildEnvironment("ENV_ID");
 	}
 
-	public void rebuildEnvironmentByName() throws BeanStalkException, InterruptedException {
+	public void rebuildEnvironmentByName() throws BeanstalkException, InterruptedException {
 		AWSElasticBeanstalk awsElasticBeastalk = getAWSElasticBeastalk();
 		new BeanstalkHelper(awsElasticBeastalk).byName().rebuildEnvironment("ENV_NAME");
 	}
 
-	public void terminateEnvironmentById() throws BeanStalkException, InterruptedException {
+	public void terminateEnvironmentById() throws BeanstalkException, InterruptedException {
 		AWSElasticBeanstalk awsElasticBeastalk = getAWSElasticBeastalk();
 		new BeanstalkHelper(awsElasticBeastalk).byId().rebuildEnvironment("ENV_ID");
 	}
 
-	public void terminateEnvironmentByName() throws BeanStalkException, InterruptedException {
+	public void terminateEnvironmentByName() throws BeanstalkException, InterruptedException {
 		AWSElasticBeanstalk awsElasticBeastalk = getAWSElasticBeastalk();
 		new BeanstalkHelper(awsElasticBeastalk).byName().terminateEnvironment("ENV_NAME");
 	}

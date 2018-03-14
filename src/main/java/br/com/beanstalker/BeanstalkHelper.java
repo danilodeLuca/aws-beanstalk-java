@@ -27,7 +27,7 @@ public class BeanstalkHelper {
 		return this;
 	}
 
-	public BeanstalkHelper rebuildEnvironment(String environmentId) throws InterruptedException, BeanStalkException {
+	public BeanstalkHelper rebuildEnvironment(String environmentId) throws InterruptedException, BeanstalkException {
 		if (isEnvironmentUp(environmentId))
 			return this;
 
@@ -37,7 +37,7 @@ public class BeanstalkHelper {
 		return this;
 	}
 
-	public BeanstalkHelper terminateEnvironment(String environmentId) throws InterruptedException, BeanStalkException {
+	public BeanstalkHelper terminateEnvironment(String environmentId) throws InterruptedException, BeanstalkException {
 		if (isEnvironmentShutDown(environmentId))
 			return this;
 
@@ -47,18 +47,18 @@ public class BeanstalkHelper {
 		return this;
 	}
 
-	private boolean isEnvironmentUp(String environmentId) throws BeanStalkException {
+	private boolean isEnvironmentUp(String environmentId) throws BeanstalkException {
 		return getEnvironmentStatus(environmentId).isEnvironmentUp();
 	}
 
-	private boolean isEnvironmentShutDown(String environment) throws BeanStalkException {
+	private boolean isEnvironmentShutDown(String environment) throws BeanstalkException {
 		return !isEnvironmentUp(environment);
 	}
 
-	private EnvironmentStatusHealth getEnvironmentStatus(String environment) throws BeanStalkException {
+	private EnvironmentStatusHealth getEnvironmentStatus(String environment) throws BeanstalkException {
 		List<EnvironmentDescription> environments = getEnvironments(environment);
 		if (environments.size() == 0) {
-			throw new BeanStalkException("No environments with that id were found. Id: " + environment);
+			throw new BeanstalkException("No environments with that id were found. Id: " + environment);
 		}
 
 		EnvironmentDescription environmentDesc = environments.get(0);
@@ -67,16 +67,16 @@ public class BeanstalkHelper {
 		return new EnvironmentStatusHealth(environmentDesc.getStatus(), environmentDesc.getHealth());
 	}
 
-	private void waitEnviromentToBeShutDown(String environmentId) throws InterruptedException, BeanStalkException {
+	private void waitEnviromentToBeShutDown(String environmentId) throws InterruptedException, BeanstalkException {
 		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Terminated, EnvironmentHealth.Grey);
 	}
 
-	private void waitEnviromentToBeReady(String environmentId) throws InterruptedException, BeanStalkException {
+	private void waitEnviromentToBeReady(String environmentId) throws InterruptedException, BeanstalkException {
 		waitForEnvironmentToTransitionToStateAndHealth(environmentId, EnvironmentStatus.Ready, EnvironmentHealth.Green);
 	}
 
 	private void waitForEnvironmentToTransitionToStateAndHealth(String environment, EnvironmentStatus state, EnvironmentHealth health)
-			throws InterruptedException, BeanStalkException {
+			throws InterruptedException, BeanstalkException {
 		int count = 0;
 		while (true) {
 			Thread.sleep(MONITORING_INTERVAL);
@@ -100,5 +100,9 @@ public class BeanstalkHelper {
 	private List<EnvironmentDescription> getEnvironments(String environment) {
 		DescribeEnvironmentsRequest describer = type.getDescribeEnvironmentsRequest(environment);
 		return this.awsBeanStalk.describeEnvironments(describer).getEnvironments();
+	}
+
+	public CreateEnvironmentResult createEnvironmet(CreateEnvironmentRequest creatingEnvironment) {
+		return this.awsBeanStalk.createEnvironment(creatingEnvironment);
 	}
 }

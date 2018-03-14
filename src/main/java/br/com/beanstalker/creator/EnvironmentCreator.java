@@ -7,10 +7,7 @@ import com.amazonaws.services.elasticbeanstalk.model.CreateEnvironmentRequest;
 import com.amazonaws.services.elasticbeanstalk.model.CreateEnvironmentResult;
 import org.apache.commons.lang3.RandomUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EnvironmentCreator {
 
@@ -19,7 +16,7 @@ public class EnvironmentCreator {
 
 	private BeanstalkHelper helper;
 	private CreateEnvironmentRequest creatingEnvironment;
-	private List<CreateEnvironmentRequest> envsToCreate = new ArrayList<>();
+	private Set<CreateEnvironmentRequest> envsToCreate = new HashSet<>();
 
 	public EnvironmentCreator(AWSElasticBeanstalk awsBeanStalk) {
 		this.helper = new BeanstalkHelper(awsBeanStalk);

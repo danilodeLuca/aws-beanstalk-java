@@ -94,7 +94,7 @@ public class BeanstalkHelper {
 			throws InterruptedException, BeanstalkException {
 		List<String> environmentsDone = new ArrayList<>();
 		int count = 0;
-		while (true || environmentsDone.size() == environments.size()) {
+		while (environmentsDone.size() < environments.size()) {
 			Thread.sleep(MONITORING_INTERVAL);
 
 			if (count++ > MONITORING_COUNT) {
@@ -104,15 +104,13 @@ public class BeanstalkHelper {
 			}
 
 			for (String env : environments) {
-				EnvironmentStatusHealth environmentStatus = getEnvironmentStatus(env);
-				if (!environmentStatus.status.equalsIgnoreCase(state.toString())) {
-					continue;
+				if (!environmentsDone.contains(env)) {
+					EnvironmentStatusHealth environmentStatus = getEnvironmentStatus(env);
+					if (environmentStatus.status.equalsIgnoreCase(state.toString())) {
+						if (health != null && environmentStatus.health.equalsIgnoreCase(health.toString()))
+							environmentsDone.add(env);
+					}
 				}
-
-				if (health != null && !environmentStatus.health.equalsIgnoreCase(health.toString())) {
-					continue;
-				}
-				environmentsDone.add(env);
 			}
 		}
 	}

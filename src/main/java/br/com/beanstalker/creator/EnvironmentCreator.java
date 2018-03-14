@@ -127,7 +127,7 @@ public class EnvironmentCreator {
 		List<CreateEnvironmentRequest> notProcessed = new ArrayList<>();
 		for (CreateEnvironmentRequest env : this.envsToCreate) {
 			try {
-				CreateEnvironmentResult environmetCreated = helper.createEnvironmet(env);
+				CreateEnvironmentResult environmetCreated = helper.createEnvironment(env);
 				addEnvironment(environmetCreated);
 			} catch (Exception e) {
 				notProcessed.add(env);

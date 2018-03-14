@@ -120,7 +120,7 @@ public class BeanstalkHelper {
 		return this.awsBeanStalk.describeEnvironments(describer).getEnvironments();
 	}
 
-	public CreateEnvironmentResult createEnvironmet(CreateEnvironmentRequest creatingEnvironment) {
+	public CreateEnvironmentResult createEnvironment(CreateEnvironmentRequest creatingEnvironment) {
 		CreateEnvironmentResult environment = this.awsBeanStalk.createEnvironment(creatingEnvironment);
 		return environment;
 	}

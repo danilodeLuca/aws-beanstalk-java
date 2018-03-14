@@ -7,15 +7,19 @@ import com.amazonaws.services.elasticbeanstalk.model.CreateEnvironmentRequest;
 import com.amazonaws.services.elasticbeanstalk.model.CreateEnvironmentResult;
 import org.apache.commons.lang3.RandomUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class EnvironmentCreator {
 
 	private static final String SEPARATOR = "|";
-	private Map<String, CreateEnvironmentResult> environments;
-	private BeanstalkHelper helper;
+	private Map<String, CreateEnvironmentResult> environments = new HashMap<>();
 
+	private BeanstalkHelper helper;
 	private CreateEnvironmentRequest creatingEnvironment;
+	private List<CreateEnvironmentRequest> envsToCreate = new ArrayList<>();
 
 	public EnvironmentCreator(AWSElasticBeanstalk awsBeanStalk) {
 		this.helper = new BeanstalkHelper(awsBeanStalk);
@@ -28,6 +32,7 @@ public class EnvironmentCreator {
 
 	public EnvironmentCreator newEnv() {
 		this.creatingEnvironment = new CreateEnvironmentRequest();
+		this.envsToCreate.add(this.creatingEnvironment);
 		return this;
 	}
 
@@ -54,19 +59,27 @@ public class EnvironmentCreator {
 
 	public EnvironmentCreator withUrl(String url) {
 		if (url != null) {
-			getCreatingEnvironment().withCNAMEPrefix(url);
+			getCreatingEnvironment().withCNAMEPrefix(url.trim());
 		}
 		return this;
 	}
 
-	public EnvironmentCreator loadFromSavedConfiguration(String savedConfigName) {
+	public EnvironmentCreator withSavedConfiguration(String savedConfigName) {
 		getCreatingEnvironment().withTemplateName(savedConfigName);
 		if (getCreatingEnvironment().getCNAMEPrefix() == null) {
 			getCreatingEnvironment().withCNAMEPrefix(getCreatingEnvironment().getEnvironmentName());
 		}
 
-		CreateEnvironmentResult environmetCreated = helper.createEnvironmet(getCreatingEnvironment());
-		addEnvironment(environmetCreated);
+		return this;
+	}
+
+	public EnvironmentCreator withConfiguration(String config) {
+		getCreatingEnvironment().withSolutionStackName(config);
+		return this;
+	}
+
+	public EnvironmentCreator withVersion(String version) {
+		getCreatingEnvironment().withVersionLabel(version);
 		return this;
 	}
 
@@ -94,9 +107,30 @@ public class EnvironmentCreator {
 		}
 	}
 
+	public void kill(String appName, String envName) throws BeanstalkException, InterruptedException {
+		CreateEnvironmentResult envToKill = getEnvironment(appName, envName);
+		this.helper.byId().terminateEnvironment(envToKill.getEnvironmentId());
+	}
+
 	public CreateEnvironmentRequest getCreatingEnvironment() {
 		if (this.creatingEnvironment == null)
 			this.creatingEnvironment = new CreateEnvironmentRequest();
 		return this.creatingEnvironment;
+	}
+
+	public EnvironmentCreator load() throws BeanstalkException {
+		List<CreateEnvironmentRequest> notProcessed = new ArrayList<>();
+		for (CreateEnvironmentRequest env : this.envsToCreate) {
+			try {
+				CreateEnvironmentResult environmetCreated = helper.createEnvironmet(env);
+				addEnvironment(environmetCreated);
+			} catch (Exception e) {
+				notProcessed.add(env);
+			}
+		}
+		if (!notProcessed.isEmpty()) {
+			throw new BeanstalkException("Some environments were not load!" + notProcessed);
+		}
+		return this;
 	}
 }
